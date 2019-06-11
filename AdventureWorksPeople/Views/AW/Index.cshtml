@@ -1,0 +1,373 @@
+﻿@model AdventureWorksPeople.Models.Departments
+@{
+    ViewBag.Title = "AW";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-left">AdventureWorks People</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="btn-group">
+                        <div class="dropdown">
+                            <button class="btn btn-primary dropdown-toggle" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Department
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink" id="DepartmentDropDown">
+                                @for (var i = 0; i < Model.DepartmentList.Count - 1; i++)
+                                {
+                                    <li><a class="dropdown-item" data-value="@Model.DepartmentList[i].Value.Replace(" ","!")" href="#">@Model.DepartmentList[i].Text </a></li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <form class="form-inline">
+                        @*<label for="SearchTextBox">Search Text</label>*@
+                        @Html.TextBox("SearchTextBox", null, new { @class = "form-control", @id = "SearchTextBox" })
+                        <button type="button" class="btn btn-primary" id="SearchButton">Search</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<div class="row" id="DepartmentRow">
+        <div class="col">
+            <h3 id="Department"></h3>
+        </div>
+    </div>*@
+    <div class="row" style="margin-top:50px">
+        <div class="col">
+            <table id="AWPeopleData" class="display mt-lg-5">
+                <caption id="Caption" class="h1 text-primary text-center"></caption>
+                <thead>
+                    <tr>
+                        <th>BusinessEntityID</th>
+                        <th>AddressID</th>
+                        <th>LastName</th>
+                        <th>FirstName</th>
+                        <th>AddressLine1</th>
+                        <th>AddressLine2</th>
+                        <th>City</th>
+                        <th>StateProvinceCode </th>
+                        <th>PostalCode</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr></tr>
+                    <tr></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+           
+        </div>
+        <div class="col-sm-6">
+            <table id="AWPeopleList" class="display mt-lg-5">
+                <thead>
+                    <tr>
+                        <th>Business Entity Id</th>
+                        <th>Last Name</th>
+                        <th>First Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr></tr>
+                    <tr></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-sm-3">
+           
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="UpdateAddress" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Employee Address</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modalbody">
+                <div class="form">
+                    <div class="form-group row">
+                        <label for="EmployeeName" class="col-sm-3 col-form-label">Name</label>
+                        <div class="col-9">
+                            <input type="text" readonly class="form-control" id="EmployeeName" value="">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="AddressLine1" class="col-sm-3 col-form-label">Address Line 1</label>
+                        <div class="col-9">
+                            <input type="text" class="form-control" id="AddressLine1" placeholder="Address Line 1">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="AddressLine2" class="col-sm-3 col-form-label">Address Line 2</label>
+                        <div class="col-9">
+                            <input type="text" class="form-control" id="AddressLine2" placeholder="Address Line 2">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="City" class="col-sm-3 col-form-label">City</label>
+                        <div class="col-9">
+                            <input type="text" class="form-control" id="City" placeholder="City">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="StateProvince" class="col-sm-3 col-form-label">State or Province</label>
+                        <div class="col-9">
+                            <input type="text" class="form-control" id="StateProvince" placeholder="State or Province">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="PostalCode" class="col-sm-3 col-form-label">Postal Code</label>
+                        <div class="col-9">
+                            <input type="text" class="form-control" id="PostalCode" placeholder="Postal Code">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="Close">Close</button>
+                <button type="button" class="btn btn-primary" id="Save">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var data2;
+        var DataRow;
+        var table;
+        var dataSearchResult2;
+        
+        $("#Department").hide();
+        $(document).ready(function () {
+            $("#AWPeopleData").hide();
+            $("#AWPeopleList").hide();
+            //--------------------------------------------------------------------------------------------------
+            // Handles save button on address change dialog
+            //--------------------------------------------------------------------------------------------------
+            $("#Save").on("click", function () {
+                var boolChange = false;  //if there has not been any changes, then don't call the function to change the address.
+                if (($("#AddressLine1").val() != data2[DataRow].addressLine1) ||
+                    ($("#AddressLine2").val() != data2[DataRow].addressLine2) ||
+                    ($("#City").val() != data2[DataRow].City) ||
+                    ($("#StateProvince").value() != data2[DataRow].stateProvinceCode) ||
+                    ($("#PostalCode").value() != data2[DataRow].postalCode)) {
+                    boolChange = true;
+                }
+                if (boolChange) {
+                    AddressData.AddressID = data2[DataRow].addressID;
+                    AddressData.BusinessEntityID = data2[DataRow].businessEntityID;
+                    AddressData.AddressLine1 = $("#AddressLine1").val();
+                    data2[DataRow].addressLine1 = $("#AddressLine1").val();
+                    AddressData.LastName = data2[DataRow].lastName;
+                    AddressData.FirstName = data2[DataRow].firstName;
+                    AddressData.AddressLine2 = $("#AddressLine2").val();
+                    data2[DataRow].addressLine2 = $("#AddressLine2").val();
+                    AddressData.City = $("#City").val();
+                    data2[DataRow].city = $("#City").val();
+                    AddressData.StateProvinceCode = $("#StateProvince").val();
+                    data2[DataRow].stateProvinceCode = $("#StateProvince").val();
+                    AddressData.PostalCode = $("#PostalCode").val();
+                    data2[DataRow].postalCode = $("#PostalCode").val();
+                    //AddressData.ModifiedDate = '';
+                    //AddressData.Url = '';
+                    var temp = JSON.stringify(AddressData);
+                    //'@Url.Action("UpdateEmployeeAddress", "AW", new { }, Request.Url.Scheme)'
+                    $.ajax({
+                        url: 'http://localhost:52598/api/employee/address/post',
+                        data: JSON.stringify(AddressData),
+                        method: "POST",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "JSON"
+                    }).done(function (data) {
+                        $('#UpdateAddress').modal('hide');
+                        table.clear();
+                        table.rows.add(data2);
+                        table.draw();
+                        if (data=="Success") {
+                            //Ste up modal dialog here
+                        }
+                    })
+                }
+
+            })
+
+            //--------------------------------------------------------------------------------------------------
+            // Gets the employees in the selected department
+            //--------------------------------------------------------------------------------------------------
+            $("#DepartmentDropDown a").on("click", function () {
+                //var Deparment = $(this).text();
+                $("#Caption").text($(this).text());
+
+                $("#Department").show();
+                var temp = $(this).data("text");
+                $("#Department").text(temp)
+                $.ajax({
+                    url: 'http://localhost:52598/api/Department',
+                    data: { DepartmentID: $(this).data("value").toString() },
+                    method: "GET",
+                    dataType: "JSON"
+                }).done(function (data) {
+                    data2 = data;
+                    //Used to allow reinitialization of table
+                    if ($.fn.dataTable.isDataTable("#AWPeopleData")) {
+                        $("#AWPeopleData").DataTable().destroy();
+                    }
+
+                    $('#AWPeopleData').show();
+                    $('#AWPeopleList').hide();
+                    table = $('#AWPeopleData').DataTable({
+                        data: data,
+                        columns: [
+                            { data: 'businessEntityID', 'targets': 0 },
+                            { data: 'addressID', 'targets': 1 },
+                            { data: 'lastName', 'targets': 2 },
+                            { data: 'firstName', 'targets': 3 },
+                            { data: 'addressLine1', 'targets': 4 },
+                            { data: 'addressLine2', 'targets': 5 },
+                            { data: 'city', 'targets': 6 },
+                            { data: 'stateProvinceCode', 'targets': 7 },
+                            { data: 'postalCode', 'targets': 8 }
+                        ],
+                        columnDefs: [
+                            {
+                                "targets": [0],
+                                "visible": false,
+                                "searchable": false
+                            },
+                            {
+                                "targets": [1],
+                                "visible": false,
+                                "searchable": false
+                            }]
+                    });
+
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    alert("Error: " + errorThrown + "   Status: " + textStatus);
+                });
+            });
+
+            //--------------------------------------------------------------------------------------------------
+            // Opens the modal address change dialog and loads the current address informatiion into it
+            //--------------------------------------------------------------------------------------------------
+            $("#AWPeopleData").on("click", "tr", function (event) {
+                //var columns = table.settings().init().columns;
+                DataRow = table.cell(event.target).index().row;
+                //var DataCol = table.cell(event.target).index().column
+                //var Properties = data.keys
+                //var Values = data.values
+                $("#EmployeeName").val(data2[DataRow].lastName + " " + data2[DataRow].firstName);
+                $("#AddressLine1").val(data2[DataRow].addressLine1);
+                $("#AddressLine2").val(data2[DataRow].addressLine2);
+                $("#City").val(data2[DataRow].city);
+                $("#StateProvince").val(data2[DataRow].stateProvinceCode);
+                $("#PostalCode").val(data2[DataRow].postalCode);
+                $("#UpdateAddress").modal('show');
+            });
+
+            $("#AWPeopleList").on("click", "tr", function (event) {
+                var DataRow = table.cell(event.target).index().row;
+                var BusinessEntityId = dataSearchResult2[DataRow].businessEntityID;
+                $.ajax({
+                    url: 'http://localhost:52598/api/employee/' + BusinessEntityId.toString(),
+                    //data: { BusinessEntityId: BusinessEntityId },
+                    method: "GET",
+                    dataType: "JSON"
+                }).done(function (employeeData) {
+                    $("#EmployeeName").val(employeeData.lastName + " " + employeeData.firstName);
+                    $("#AddressLine1").val(employeeData.employeeAddresses[0].addressLine1);
+                    $("#AddressLine2").val(employeeData.employeeAddresses[0].addressLine2);
+                    $("#City").val(employeeData.employeeAddresses[0].city);
+                    $("#StateProvince").val(employeeData.employeeAddresses[0].stateProvinceCode);
+                    $("#PostalCode").val(employeeData.employeeAddresses[0].postalCode);
+                    $("#UpdateAddress").modal('show');
+                });
+            })
+            
+            var AddressData = {
+                AddressID : '-1',
+                BusinessEntityID: '-1',
+                LastName:'',
+                FirstName:'',
+                AddressLine1: '',
+                AddressLine2: '',
+                City: '',
+                StateProvinceCode: '',
+                PostalCode: '',
+            }
+        });
+
+        //contentType: "application/json; charset=utf-8",
+        //data: { SearchText: $("#SearchText").val() },
+        //--------------------------------------------------------------------------------------------------
+        // Handles the search button click event - begins searching for employees
+        //--------------------------------------------------------------------------------------------------
+        $("#SearchButton").on("click", function () {
+            $("#Department").hide();
+            if ($.fn.dataTable.isDataTable("#AWPeopleData")) {
+                $("#AWPeopleData").DataTable().destroy();
+            }
+            var Text = $("#SearchTextBox").val()
+            $.ajax({
+                url: 'http://localhost:52598/api/employees/search/'+ $("#SearchTextBox").val(),
+                method: "GET",
+                dataType: "JSON"
+            }).done(function (dataSearchResult) {
+                dataSearchResult2 = dataSearchResult;
+                //Used to allow reinitializationof table
+                if ($.fn.dataTable.isDataTable("#AWPeopleList")) {
+                    $("#AWPeopleList").DataTable().destroy();
+                }
+
+                $('#AWPeopleData').hide();
+                $('#AWPeopleList').show();
+                table = $('#AWPeopleList').DataTable({
+                    data: dataSearchResult,
+                    columns: [
+                        { data: 'businessEntityID', 'targets': 0 },
+                        { data: 'lastName', 'targets': 1 },
+                        { data: 'firstName', 'targets': 2 },
+                    ],
+                    columnDefs: [
+                        {
+                            "targets": [0],
+                            "visible": false,
+                            "searchable": false
+                        }]
+                });
+            });
+            
+        });
+
+        function Reverse(theString) {
+            var temp = '';
+            for (k = theString.length-1; k >= 0; k--) {
+                temp = temp + theString.substring(k, k + 1);
+            }
+            return temp;
+        }
+    </script>
+}
